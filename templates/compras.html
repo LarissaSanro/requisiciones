@@ -246,6 +246,13 @@
 
 <script>
 function showTab(id, btn) {
+  document.getElementById('tab-req').style.display = id==='req' ? 'block' : 'none';
+  document.getElementById('tab-pres').style.display = id==='pres' ? 'block' : 'none';
+  document.getElementById('tab-prod').style.display = id==='prod' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  return false;
+}
   ['req','pres','prod'].forEach(t => document.getElementById('tab-'+t).style.display = t===id?'block':'none');
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
