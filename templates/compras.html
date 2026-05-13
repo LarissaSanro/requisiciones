@@ -193,7 +193,14 @@
     <div id="new-prod-form" style="display:none;background:#fff;border:2px solid #3b82f6;border-radius:12px;padding:16px;margin-bottom:12px">
       <p style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:10px">Nuevo producto</p>
       <div class="form-grid">
-        <div><label>Nombre</label><input id="np-name" type="text"></div>
+        <div class="form-grid">
+  <div><label>SKU</label><input id="np-id" type="text" placeholder="Ej: PP-001"></div>
+  <div><label>Nombre</label><input id="np-name" type="text"></div>
+  <div><label>Categoría</label><input id="np-cat" type="text" placeholder="Ej: PAPELERIA"></div>
+  <div><label>Unidad</label><input id="np-unit" type="text" placeholder="Ej: PIEZA"></div>
+  <div><label>Emoji</label><input id="np-img" type="text" placeholder="📦"></div>
+  <div><label>Precio (MXN)</label><input id="np-price" type="number" min="0"></div>
+</div>
         <div><label>Categoría</label><input id="np-cat" type="text" placeholder="Ej: PAPELERIA"></div>
         <div><label>Unidad</label><input id="np-unit" type="text" placeholder="Ej: PIEZA"></div>
         <div><label>Emoji</label><input id="np-img" type="text" placeholder="📦"></div>
@@ -282,6 +289,19 @@ function saveBudget(id) {
 
 function showNewProd() { document.getElementById('new-prod-form').style.display = 'block'; }
 function saveNewProd() {
+  const id = document.getElementById('np-id').value || 'p' + Date.now();
+  fetch('/guardar_producto', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
+      id, name: document.getElementById('np-name').value,
+      category: document.getElementById('np-cat').value,
+      unit: document.getElementById('np-unit').value,
+      img: document.getElementById('np-img').value || '📦',
+      price: document.getElementById('np-price').value
+    })
+  }).then(() => location.reload());
+}
   const id = 'p' + Date.now();
   fetch('/guardar_producto', {
     method: 'POST',
