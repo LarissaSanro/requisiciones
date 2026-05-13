@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Compras</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
+    header { background: #1e293b; color: #fff; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .h-btn { padding: 5px 12px; border: 1px solid #475569; border-radius: 6px; background: transparent; color: #94a3b8; font-size: 11px; cursor: pointer; text-decoration: none; }
+    .alert-banner { background: #fef3c7; border-bottom: 1px solid #fcd34d; padding: 10px 24px; font-size: 13px; color: #92400e; }
+    .tabs { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; gap: 2px; }
+    .tab { padding: 12px 16px; border: none; border-bottom: 2px solid transparent; background: transparent; font-size: 13px; cursor: pointer; color: #64748b; font-weight: 500; }
+    .tab.active { color: #1e293b; font-weight: 700; border-bottom-color: #1e293b; }
+    .content { padding: 20px 24px; max-width: 1100px; margin: 0 auto; }
+    .stats-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .stat-card { flex: 1 1 100px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .stat-card.active { border-color: #1e293b; background: #1e293b; }
+    .stat-card.active .stat-num, .stat-card.active .stat-label { color: #fff !important; }
+    .stat-num { font-size: 22px; font-weight: 800; color: #1e293b; }
+    .stat-label { font-size: 11px; color: #64748b; }
+    .req-card { background: #fff; border-radius: 12px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1.5px solid #f1f5f9; margin-bottom: 10px; }
+    .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .pill { font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 20px; border: 1px solid; }
+    .chip { font-size: 11px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 7px; color: #475569; }
+    .link-btn { background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; font-weight: 500; padding: 0; }
+    .action-btn { padding: 5px 12px; background: #3b82f6; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .detail-table { margin-top: 10px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 7px 10px; text-align: left; font-size: 11px; color: #64748b; font-weight: 600; background: #f8f9fa; }
+    td { padding: 7px 10px; font-size: 12px; color: #1e293b; border-top: 1px solid #f1f5f9; }
+    .budget-card { background: #fff; border-radius: 12px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1.5px solid #f1f5f9; margin-bottom: 10px; }
+    .track { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+    .fill { height: 100%; border-radius: 4px; transition: width .4s; }
+    .prod-row { background: #fff; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1.5px solid #f1f5f9; margin-bottom: 8px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .form-grid label { font-size: 12px; color: #64748b; display: block; margin-bottom: 3px; }
+    .form-grid input, .form-grid select { padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 7px; font-size: 13px; width: 100%; outline: none; }
+    .empty { text-align: center; padding: 50px 0; color: #94a3b8; }
+    h2 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:18px">🏪</span>
+    <span style="font-weight:700;font-size:15px">Panel de Compras</span>
+    {% if alerts %}
+    <span style="background:#ef4444;color:#fff;border-radius:20px;font-size:11px;padding:2px 8px;font-weight:700">
+      ⚠️ {{ alerts|length }} área{{ 's' if alerts|length > 1 }} sin presupuesto
+    </span>
+    {% endif %}
+  </div>
+  <a href="/logout" class="h-btn">Salir</a>
+</header>
+
+{% if alerts %}
+<div class="alert-banner">
+  🔔 <b>Alerta de presupuesto:</b>
+  {{ alerts|map(attribute='name')|join(', ') }}
+  {{ 'han agotado sus presupuestos' if alerts|length > 1 else 'ha agotado su presupuesto' }} este mes.
+</div>
+{% endif %}
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('req', this)">📋 Requisiciones</button>
+  <button class="tab" onclick="showTab('pres', this)">💰 Presupuestos</button>
+  <button class="tab" onclick="showTab('prod', this)">🗂️ Productos</button>
+</div>
+
+<div class="content">
+
+  <!-- REQUISICIONES -->
+  <div id="tab-req">
+    <div class="stats-row">
+      {% set counts = {'todos': requisitions|length, 'pendiente': requisitions|selectattr('status','eq','pendiente')|list|length, 'en proceso': requisitions|selectattr('status','eq','en proceso')|list|length, 'completado': requisitions|selectattr('status','eq','completado')|list|length} %}
+      {% for key, icon, label in [('todos','📋','Total'),('pendiente','⏳','Pendientes'),('en proceso','🔄','En proceso'),('completado','✅','Completadas')] %}
+      <div class="stat-card {% if loop.first %}active{% endif %}" onclick="filterReqs('{{ key }}', this)">
+        <span style="font-size:18px">{{ icon }}</span>
+        <span class="stat-num">{{ counts[key] }}</span>
+        <span class="stat-label">{{ label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="req-list">
+      {% for r in requisitions %}
+      <div class="req-card" data-status="{{ r.status }}">
+        <div class="req-header">
+          <div>
+            <span style="font-size:11px;font-weight:700;color:#94a3b8;margin-right:8px">{{ r.id }}</span>
+            <span style="font-size:14px;font-weight:700;color:#1e293b">{{ r.area }}</span>
+            <span style="font-size:10px;color:#64748b;margin-left:6px">CC{{ r.cc }}</span>
+            {% if r.authorized %}
+            <span style="margin-left:8px;font-size:10px;background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:10px;font-weight:600">Dir. autorizado</span>
+            {% endif %}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="pill" style="background:{{ {'pendiente':'#f59e0b','en proceso':'#3b82f6','completado':'#10b981','rechazado':'#ef4444'}[r.status] }}22;color:{{ {'pendiente':'#f59e0b','en proceso':'#3b82f6','completado':'#10b981','rechazado':'#ef4444'}[r.status] }};border-color:{{ {'pendiente':'#f59e0b','en proceso':'#3b82f6','completado':'#10b981','rechazado':'#ef4444'}[r.status] }}55">{{ r.status }}</span>
+            <span style="font-size:11px;color:#94a3b8">{{ r.created_at }}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+          {% for i in r.items[:3] %}
+          <span class="chip">{{ i.img }} {{ i.name }} ×{{ i.qty }}</span>
+          {% endfor %}
+          {% if r.items|length > 3 %}
+          <span class="chip">+{{ r.items|length - 3 }} más</span>
+          {% endif %}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:700;color:#1e293b">Total: ${{ "%.2f"|format(r.total) }}</span>
+          {% if r.notes %}<span style="font-size:11px;color:#64748b;font-style:italic">💬 {{ r.notes }}</span>{% endif %}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <button class="link-btn" onclick="toggleDetail(this)">Ver detalle ▼</button>
+          <div style="display:flex;gap:6px">
+            {% if r.status == 'pendiente' %}
+            <button class="action-btn" onclick="updateStatus('{{ r.id }}','en proceso',this)">🔄 Procesar</button>
+            <button class="action-btn" style="background:#ef4444" onclick="updateStatus('{{ r.id }}','rechazado',this)">✕ Rechazar</button>
+            {% elif r.status == 'en proceso' %}
+            <button class="action-btn" style="background:#10b981" onclick="updateStatus('{{ r.id }}','completado',this)">✅ Completar</button>
+            {% endif %}
+          </div>
+        </div>
+        <div class="detail-table" style="display:none">
+          <table>
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Precio unit.</th><th>Cant.</th><th style="text-align:right">Subtotal</th></tr></thead>
+            <tbody>
+              {% for i in r.items %}
+              <tr>
+                <td>{{ i.img }} {{ i.name }}</td>
+                <td>{{ i.category }}</td>
+                <td>${{ "%.2f"|format(i.price) }}</td>
+                <td>{{ i.qty }}</td>
+                <td style="text-align:right;font-weight:600">${{ "%.2f"|format(i.subtotal) }}</td>
+              </tr>
+              {% endfor %}
+              <tr style="background:#f8fafc">
+                <td colspan="4" style="text-align:right;font-weight:700">Total</td>
+                <td style="text-align:right;font-weight:800;color:#1e293b">${{ "%.2f"|format(r.total) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty"><span style="font-size:44px">📭</span><p style="margin-top:10px">No hay requisiciones aún.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- PRESUPUESTOS -->
+  <div id="tab-pres" style="display:none">
+    <h2>Presupuestos mensuales por área</h2>
+    {% for a in areas %}
+    {% set s = spent[a.id] %}
+    {% set pct = [((s/a.budget)*100) if a.budget > 0 else 0, 100]|min %}
+    <div class="budget-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-weight:700;font-size:14px;color:#1e293b">{{ a.name }} <span style="font-size:11px;color:#94a3b8">CC{{ a.cc }}</span></span>
+        <button class="link-btn" onclick="editBudget('{{ a.id }}','{{ a.name }}',{{ a.budget }})">✏️ Editar</button>
+      </div>
+      <div id="budget-edit-{{ a.id }}" style="display:none;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:13px;color:#64748b;white-space:nowrap">Presupuesto mensual:</label>
+          <input type="number" id="budget-val-{{ a.id }}" value="{{ a.budget }}" style="padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;width:140px;outline:none">
+          <button class="action-btn" style="background:#10b981" onclick="saveBudget('{{ a.id }}')">Guardar</button>
+          <button class="action-btn" style="background:#94a3b8" onclick="cancelBudget('{{ a.id }}')">Cancelar</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:5px">
+        <span>Gastado: <b style="color:#1e293b">${{ "%.2f"|format(s) }}</b></span>
+        <span>Presupuesto: <b style="color:#1e293b">${{ "%.2f"|format(a.budget) }}</b></span>
+        <span style="color:{{ '#ef4444' if pct >= 100 else '#f59e0b' if pct >= 80 else '#10b981' }}">
+          {{ '⚠️ Agotado' if pct >= 100 else 'Disponible: $' + "%.2f"|format(a.budget - s) }}
+        </span>
+      </div>
+      <div class="track">
+        <div class="fill" style="width:{{ pct }}%;background:{{ '#ef4444' if pct >= 100 else '#f59e0b' if pct >= 80 else '#10b981' }}"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- PRODUCTOS -->
+  <div id="tab-prod" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h2 style="margin:0">Catálogo de productos</h2>
+      <button class="action-btn" style="background:#1e293b" onclick="showNewProd()">+ Agregar</button>
+    </div>
+    <div id="new-prod-form" style="display:none;background:#fff;border:2px solid #3b82f6;border-radius:12px;padding:16px;margin-bottom:12px">
+      <p style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:10px">Nuevo producto</p>
+      <div class="form-grid">
+        <div><label>Nombre</label><input id="np-name" type="text"></div>
+        <div><label>Categoría</label><input id="np-cat" type="text" placeholder="Ej: PAPELERIA"></div>
+        <div><label>Unidad</label><input id="np-unit" type="text" placeholder="Ej: PIEZA"></div>
+        <div><label>Emoji</label><input id="np-img" type="text" placeholder="📦"></div>
+        <div><label>Precio (MXN)</label><input id="np-price" type="number" min="0"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="action-btn" style="background:#10b981" onclick="saveNewProd()">Guardar</button>
+        <button class="action-btn" style="background:#94a3b8" onclick="document.getElementById('new-prod-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="prod-list">
+      {% for p in catalog %}
+      <div class="prod-row" id="prod-row-{{ p.id }}">
+        <span style="font-size:22px">{{ p.img }}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:#1e293b">{{ p.name }}</div>
+          <div style="font-size:11px;color:#94a3b8">{{ p.category }} · {{ p.unit }}</div>
+        </div>
+        <span style="font-size:14px;font-weight:700;color:#1e293b">${{ "%.2f"|format(p.price) }}</span>
+        <button class="link-btn" onclick="editProd('{{ p.id }}','{{ p.name }}','{{ p.category }}','{{ p.unit }}','{{ p.img }}',{{ p.price }})">✏️ Editar</button>
+      </div>
+      <div id="edit-prod-{{ p.id }}" style="display:none;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:8px">
+        <div class="form-grid">
+          <div><label>Nombre</label><input id="ep-name-{{ p.id }}" type="text" value="{{ p.name }}"></div>
+          <div><label>Categoría</label><input id="ep-cat-{{ p.id }}" type="text" value="{{ p.category }}"></div>
+          <div><label>Unidad</label><input id="ep-unit-{{ p.id }}" type="text" value="{{ p.unit }}"></div>
+          <div><label>Emoji</label><input id="ep-img-{{ p.id }}" type="text" value="{{ p.img }}"></div>
+          <div><label>Precio (MXN)</label><input id="ep-price-{{ p.id }}" type="number" value="{{ p.price }}"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="action-btn" style="background:#10b981" onclick="saveProd('{{ p.id }}')">Guardar</button>
+          <button class="action-btn" style="background:#94a3b8" onclick="cancelEditProd('{{ p.id }}')">Cancelar</button>
+          <button class="action-btn" style="background:#ef4444;margin-left:auto" onclick="deleteProd('{{ p.id }}')">Eliminar</button>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty"><span style="font-size:44px">📭</span><p style="margin-top:10px">No hay productos en el catálogo aún.<br>Agrega el primero con el botón de arriba.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(id, btn) {
+  ['req','pres','prod'].forEach(t => document.getElementById('tab-'+t).style.display = t===id?'block':'none');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function filterReqs(status, card) {
+  document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  document.querySelectorAll('.req-card').forEach(r => {
+    r.style.display = (status==='todos' || r.dataset.status===status) ? 'block' : 'none';
+  });
+}
+
+function toggleDetail(btn) {
+  const table = btn.closest('.req-card').querySelector('.detail-table');
+  const open  = table.style.display !== 'none';
+  table.style.display = open ? 'none' : 'block';
+  btn.textContent     = open ? 'Ver detalle ▼' : 'Ocultar ▲';
+}
+
+function updateStatus(id, status, btn) {
+  fetch('/actualizar_status', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({id, status})
+  }).then(() => location.reload());
+}
+
+function editBudget(id, name, budget) {
+  document.getElementById('budget-edit-'+id).style.display = 'block';
+}
+function cancelBudget(id) { document.getElementById('budget-edit-'+id).style.display = 'none'; }
+function saveBudget(id) {
+  const budget = document.getElementById('budget-val-'+id).value;
+  fetch('/guardar_presupuesto', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({area_id: id, budget})
+  }).then(() => location.reload());
+}
+
+function showNewProd() { document.getElementById('new-prod-form').style.display = 'block'; }
+function saveNewProd() {
+  const id = 'p' + Date.now();
+  fetch('/guardar_producto', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
+      id, name: document.getElementById('np-name').value,
+      category: document.getElementById('np-cat').value,
+      unit: document.getElementById('np-unit').value,
+      img: document.getElementById('np-img').value || '📦',
+      price: document.getElementById('np-price').value
+    })
+  }).then(() => location.reload());
+}
+
+function editProd(id, name, cat, unit, img, price) {
+  document.getElementById('prod-row-'+id).style.display = 'none';
+  document.getElementById('edit-prod-'+id).style.display = 'block';
+}
+function cancelEditProd(id) {
+  document.getElementById('prod-row-'+id).style.display = 'flex';
+  document.getElementById('edit-prod-'+id).style.display = 'none';
+}
+function saveProd(id) {
+  fetch('/guardar_producto', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
+      id, name: document.getElementById('ep-name-'+id).value,
+      category: document.getElementById('ep-cat-'+id).value,
+      unit: document.getElementById('ep-unit-'+id).value,
+      img: document.getElementById('ep-img-'+id).value,
+      price: document.getElementById('ep-price-'+id).value
+    })
+  }).then(() => location.reload());
+}
+function deleteProd(id) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  fetch('/eliminar_producto', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({id})
+  }).then(() => location.reload());
+}
+</script>
+</body>
+</html>

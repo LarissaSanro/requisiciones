@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requisiciones — Iniciar sesión</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e293b, #0f172a); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .card { background: #fff; border-radius: 16px; padding: 40px 36px; width: 360px; box-shadow: 0 25px 60px rgba(0,0,0,.4); display: flex; flex-direction: column; gap: 14px; }
+    .logo { font-size: 44px; text-align: center; }
+    h1 { font-size: 20px; font-weight: 700; text-align: center; color: #1e293b; }
+    p.sub { font-size: 13px; color: #64748b; text-align: center; }
+    .tabs { display: flex; gap: 4px; background: #f1f5f9; border-radius: 8px; padding: 3px; }
+    .tab { flex: 1; padding: 7px 0; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; background: transparent; color: #64748b; }
+    .tab.active { background: #fff; color: #1e293b; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+    select, input[type=password] { padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #1e293b; width: 100%; outline: none; }
+    .error { font-size: 12px; color: #ef4444; text-align: center; }
+    .btn { padding: 12px; background: #1e293b; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+    .btn:hover { background: #334155; }
+    #area-select { display: block; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">📋</div>
+  <h1>Requisiciones Internas</h1>
+  <p class="sub">Sistema de solicitud de insumos</p>
+
+  <form method="POST">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="tabs">
+        <button type="button" class="tab active" id="tab-area" onclick="setMode('area')">Mi área</button>
+        <button type="button" class="tab" id="tab-compras" onclick="setMode('compras')">Compras</button>
+      </div>
+
+      <input type="hidden" name="mode" id="mode" value="area">
+
+      <div id="area-select">
+        <select name="area_id">
+          <option value="">— Selecciona tu área —</option>
+          {% for area in areas %}
+          <option value="{{ area.id }}">{{ area.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <input type="password" name="password" placeholder="Contraseña" required>
+
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% endif %}
+
+      <button type="submit" class="btn">Ingresar →</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function setMode(mode) {
+    document.getElementById('mode').value = mode;
+    document.getElementById('area-select').style.display = mode === 'area' ? 'block' : 'none';
+    document.getElementById('tab-area').classList.toggle('active', mode === 'area');
+    document.getElementById('tab-compras').classList.toggle('active', mode === 'compras');
+  }
+</script>
+</body>
+</html>
