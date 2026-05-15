@@ -251,11 +251,6 @@ function showTab(id, btn) {
   document.getElementById('tab-prod').style.display = id==='prod' ? 'block' : 'none';
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  return false;
-}
-  ['req','pres','prod'].forEach(t => document.getElementById('tab-'+t).style.display = t===id?'block':'none');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
 }
 
 function filterReqs(status, card) {
@@ -297,19 +292,6 @@ function saveBudget(id) {
 function showNewProd() { document.getElementById('new-prod-form').style.display = 'block'; }
 function saveNewProd() {
   const id = document.getElementById('np-id').value || 'p' + Date.now();
-  fetch('/guardar_producto', {
-    method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded'},
-    body: new URLSearchParams({
-      id, name: document.getElementById('np-name').value,
-      category: document.getElementById('np-cat').value,
-      unit: document.getElementById('np-unit').value,
-      img: document.getElementById('np-img').value || '📦',
-      price: document.getElementById('np-price').value
-    })
-  }).then(() => location.reload());
-}
-  const id = 'p' + Date.now();
   fetch('/guardar_producto', {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
