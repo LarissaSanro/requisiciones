@@ -479,7 +479,8 @@ def eliminar_producto():
     data["catalog"] = [p for p in data["catalog"] if p["id"] != prod_id]
     save_data(data)
     return jsonify({"ok": True})
-    @app.route("/subir_imagen", methods=["POST"])
+
+@app.route("/subir_imagen", methods=["POST"])
 def subir_imagen():
     if session.get("role") != "compras":
         return jsonify({"ok": False})
