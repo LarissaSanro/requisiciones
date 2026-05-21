@@ -197,7 +197,11 @@
   <div><label>Nombre</label><input id="np-name" type="text"></div>
   <div><label>Categoría</label><input id="np-cat" type="text" placeholder="Ej: PAPELERIA"></div>
   <div><label>Unidad</label><input id="np-unit" type="text" placeholder="Ej: PIEZA"></div>
-  <div><label>Emoji</label><input id="np-img" type="text" placeholder="📦"></div>
+  <div>
+  <label>Imagen o Emoji</label>
+  <input id="np-img" type="text" placeholder="📦">
+  <input type="file" id="np-file" accept="image/*" style="margin-top:5px;font-size:12px;width:100%" onchange="subirImagen('np-img', this)">
+</div>
   <div><label>Precio (MXN)</label><input id="np-price" type="number" min="0"></div>
 </div>
       <div style="display:flex;gap:8px">
@@ -221,7 +225,11 @@
           <div><label>Nombre</label><input id="ep-name-{{ p.id }}" type="text" value="{{ p.name }}"></div>
           <div><label>Categoría</label><input id="ep-cat-{{ p.id }}" type="text" value="{{ p.category }}"></div>
           <div><label>Unidad</label><input id="ep-unit-{{ p.id }}" type="text" value="{{ p.unit }}"></div>
-          <div><label>Emoji</label><input id="ep-img-{{ p.id }}" type="text" value="{{ p.img }}"></div>
+          <div>
+  <label>Imagen o Emoji</label>
+  <input id="ep-img-{{ p.id }}" type="text" value="{{ p.img }}">
+  <input type="file" id="ep-file-{{ p.id }}" accept="image/*" style="margin-top:5px;font-size:12px;width:100%" onchange="subirImagen('ep-img-{{ p.id }}', this)">
+</div>
           <div><label>Precio (MXN)</label><input id="ep-price-{{ p.id }}" type="number" value="{{ p.price }}"></div>
         </div>
         <div style="display:flex;gap:8px">
@@ -320,7 +328,19 @@ function saveProd(id) {
     })
   }).then(() => location.reload());
 }
-function deleteProd(id) {
+
+function subirImagen(targetId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('imagen', file);
+  fetch('/subir_imagen', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) document.getElementById(targetId).value = data.url;
+      else alert('Error al subir imagen: ' + data.error);
+    });
+}function deleteProd(id) {
   if (!confirm('¿Eliminar este producto?')) return;
   fetch('/eliminar_producto', {
     method: 'POST',

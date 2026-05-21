@@ -478,6 +478,21 @@ def eliminar_producto():
     data["catalog"] = [p for p in data["catalog"] if p["id"] != prod_id]
     save_data(data)
     return jsonify({"ok": True})
+    @app.route("/subir_imagen", methods=["POST"])
+def subir_imagen():
+    if session.get("role") != "compras":
+        return jsonify({"ok": False})
+    if "imagen" not in request.files:
+        return jsonify({"ok": False, "error": "No se recibió imagen"})
+    file = request.files["imagen"]
+    if file.filename == "":
+        return jsonify({"ok": False, "error": "No se seleccionó archivo"})
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ["jpg", "jpeg", "png", "webp", "gif"]:
+        return jsonify({"ok": False, "error": "Formato no permitido"})
+    filename = f"prod_{datetime.now().strftime('%y%m%d%H%M%S')}.{ext}"
+    file.save(os.path.join("static", filename))
+    return jsonify({"ok": True, "url": f"/static/{filename}"})
 
 if __name__ == "__main__":
     app.run(debug=True)
