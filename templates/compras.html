@@ -39,6 +39,7 @@
     .form-grid input, .form-grid select { padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 7px; font-size: 13px; width: 100%; outline: none; }
     .empty { text-align: center; padding: 50px 0; color: #94a3b8; }
     h2 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 14px; }
+    .prod-img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
   </style>
 </head>
 <body>
@@ -83,7 +84,6 @@
       </div>
       {% endfor %}
     </div>
-
     <div id="req-list">
       {% for r in requisitions %}
       <div class="req-card" data-status="{{ r.status }}">
@@ -160,7 +160,7 @@
     <div class="budget-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <span style="font-weight:700;font-size:14px;color:#1e293b">{{ a.name }} <span style="font-size:11px;color:#94a3b8">CC{{ a.cc }}</span></span>
-        <button class="link-btn" onclick="editBudget('{{ a.id }}','{{ a.name }}',{{ a.budget }})">✏️ Editar</button>
+        <button class="link-btn" onclick="editBudget('{{ a.id }}')">✏️ Editar</button>
       </div>
       <div id="budget-edit-{{ a.id }}" style="display:none;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:8px">
@@ -193,17 +193,16 @@
     <div id="new-prod-form" style="display:none;background:#fff;border:2px solid #3b82f6;border-radius:12px;padding:16px;margin-bottom:12px">
       <p style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:10px">Nuevo producto</p>
       <div class="form-grid">
-  <div><label>SKU</label><input id="np-id" type="text" placeholder="Ej: PP-001"></div>
-  <div><label>Nombre</label><input id="np-name" type="text"></div>
-  <div><label>Categoría</label><input id="np-cat" type="text" placeholder="Ej: PAPELERIA"></div>
-  <div><label>Unidad</label><input id="np-unit" type="text" placeholder="Ej: PIEZA"></div>
-  <div>
-  <label>Imagen o Emoji</label>
-  <input id="np-img" type="text" placeholder="📦">
-  <input type="file" id="np-file" accept="image/*" style="margin-top:5px;font-size:12px;width:100%" onchange="subirImagen('np-img', this)">
-</div>
-  <div><label>Precio (MXN)</label><input id="np-price" type="number" min="0"></div>
-</div>
+        <div><label>Nombre</label><input id="np-name" type="text"></div>
+        <div><label>Categoría</label><input id="np-cat" type="text" placeholder="Ej: PAPELERIA"></div>
+        <div><label>Unidad</label><input id="np-unit" type="text" placeholder="Ej: PIEZA"></div>
+        <div>
+          <label>Imagen o Emoji</label>
+          <input id="np-img" type="text" placeholder="📦">
+          <input type="file" id="np-file" accept="image/*" style="margin-top:5px;font-size:12px;width:100%" onchange="subirImagen('np-img', this)">
+        </div>
+        <div><label>Precio (MXN)</label><input id="np-price" type="number" min="0"></div>
+      </div>
       <div style="display:flex;gap:8px">
         <button class="action-btn" style="background:#10b981" onclick="saveNewProd()">Guardar</button>
         <button class="action-btn" style="background:#94a3b8" onclick="document.getElementById('new-prod-form').style.display='none'">Cancelar</button>
@@ -212,7 +211,11 @@
     <div id="prod-list">
       {% for p in catalog %}
       <div class="prod-row" id="prod-row-{{ p.id }}">
+        {% if p.img.startswith('/') or p.img.startswith('http') %}
+        <img src="{{ p.img }}" class="prod-img">
+        {% else %}
         <span style="font-size:22px">{{ p.img }}</span>
+        {% endif %}
         <div style="flex:1">
           <div style="font-size:13px;font-weight:600;color:#1e293b">{{ p.name }}</div>
           <div style="font-size:11px;color:#94a3b8">{{ p.category }} · {{ p.unit }}</div>
@@ -226,10 +229,10 @@
           <div><label>Categoría</label><input id="ep-cat-{{ p.id }}" type="text" value="{{ p.category }}"></div>
           <div><label>Unidad</label><input id="ep-unit-{{ p.id }}" type="text" value="{{ p.unit }}"></div>
           <div>
-  <label>Imagen o Emoji</label>
-  <input id="ep-img-{{ p.id }}" type="text" value="{{ p.img }}">
-  <input type="file" id="ep-file-{{ p.id }}" accept="image/*" style="margin-top:5px;font-size:12px;width:100%" onchange="subirImagen('ep-img-{{ p.id }}', this)">
-</div>
+            <label>Imagen o Emoji</label>
+            <input id="ep-img-{{ p.id }}" type="text" value="{{ p.img }}">
+            <input type="file" accept="image/*" style="margin-top:5px;font-size:12px;width:100%" onchange="subirImagen('ep-img-{{ p.id }}', this)">
+          </div>
           <div><label>Precio (MXN)</label><input id="ep-price-{{ p.id }}" type="number" value="{{ p.price }}"></div>
         </div>
         <div style="display:flex;gap:8px">
@@ -239,7 +242,7 @@
         </div>
       </div>
       {% else %}
-      <div class="empty"><span style="font-size:44px">📭</span><p style="margin-top:10px">No hay productos en el catálogo aún.<br>Agrega el primero con el botón de arriba.</p></div>
+      <div class="empty"><span style="font-size:44px">📭</span><p style="margin-top:10px">No hay productos aún.</p></div>
       {% endfor %}
     </div>
   </div>
@@ -278,7 +281,7 @@ function updateStatus(id, status, btn) {
   }).then(() => location.reload());
 }
 
-function editBudget(id, name, budget) {
+function editBudget(id) {
   document.getElementById('budget-edit-'+id).style.display = 'block';
 }
 function cancelBudget(id) { document.getElementById('budget-edit-'+id).style.display = 'none'; }
@@ -292,8 +295,26 @@ function saveBudget(id) {
 }
 
 function showNewProd() { document.getElementById('new-prod-form').style.display = 'block'; }
+
+function subirImagen(targetId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('imagen', file);
+  fetch('/subir_imagen', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        document.getElementById(targetId).value = data.url;
+        alert('Imagen subida correctamente');
+      } else {
+        alert('Error: ' + data.error);
+      }
+    });
+}
+
 function saveNewProd() {
-  const id = document.getElementById('np-id').value || 'p' + Date.now();
+  const id = 'p' + Date.now();
   fetch('/guardar_producto', {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded'},
@@ -328,19 +349,7 @@ function saveProd(id) {
     })
   }).then(() => location.reload());
 }
-
-function subirImagen(targetId, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const formData = new FormData();
-  formData.append('imagen', file);
-  fetch('/subir_imagen', { method: 'POST', body: formData })
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok) document.getElementById(targetId).value = data.url;
-      else alert('Error al subir imagen: ' + data.error);
-    });
-}function deleteProd(id) {
+function deleteProd(id) {
   if (!confirm('¿Eliminar este producto?')) return;
   fetch('/eliminar_producto', {
     method: 'POST',
