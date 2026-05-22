@@ -25,6 +25,7 @@ AREAS = [
 
 COMPRAS_PASSWORD   = "compras2024"
 DIRECCION_PASSWORD = "direccion2024"
+IMGBB_API_KEY = "9d97d0d356aaf6b933b1a8ebab8ab14a"
 DATA_FILE = "data.json"
 
 def get_default_catalog():
@@ -483,18 +484,28 @@ def eliminar_producto():
 @app.route("/subir_imagen", methods=["POST"])
 def subir_imagen():
     if session.get("role") != "compras":
-        return jsonify({"ok": False})
+        return jsonify({"ok": False, "error": "Sin permisos"})
     if "imagen" not in request.files:
         return jsonify({"ok": False, "error": "No se recibió imagen"})
     file = request.files["imagen"]
     if file.filename == "":
         return jsonify({"ok": False, "error": "No se seleccionó archivo"})
-    ext = file.filename.rsplit(".", 1)[-1].lower()
-    if ext not in ["jpg", "jpeg", "png", "webp", "gif"]:
-        return jsonify({"ok": False, "error": "Formato no permitido"})
-    filename = f"prod_{datetime.now().strftime('%y%m%d%H%M%S')}.{ext}"
-    file.save(os.path.join("static", filename))
-    return jsonify({"ok": True, "url": f"/static/{filename}"})
+    try:
+        import base64, urllib.request, urllib.parse
+        image_data = base64.b64encode(file.read()).decode("utf-8")
+        data = urllib.parse.urlencode({
+            "key": IMGBB_API_KEY,
+            "image": image_data
+        }).encode()
+        req = urllib.request.Request("https://api.imgbb.com/1/upload", data=data)
+        with urllib.request.urlopen(req, timeout=30) as response:
+            result = json.loads(response.read().decode())
+        if result.get("success"):
+            return jsonify({"ok": True, "url": result["data"]["url"]})
+        else:
+            return jsonify({"ok": False, "error": str(result)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
 
 if __name__ == "__main__":
     app.run(debug=True)
