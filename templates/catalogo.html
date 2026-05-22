@@ -140,7 +140,7 @@ function renderGrid() {
   if (!grid) return;
   grid.innerHTML = filtered.map(p => `
     <div class="card">
-      <div class="card-emoji">${p.img}</div>
+      <div class="card-emoji">${p.img.startsWith('/') || p.img.startsWith('http') ? `<img src="${p.img}" style="width:50px;height:50px;object-fit:cover;border-radius:8px">` : p.img}</div>
       <div class="card-name">${p.name}</div>
       <div class="card-unit">${p.unit}</div>
       <div class="card-cat">${p.category}</div>
