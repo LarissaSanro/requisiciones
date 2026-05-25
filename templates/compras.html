@@ -102,12 +102,12 @@
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-          {% for i in r.items|list %}
+          {% for i in r.productos|list %}
 
           <span class="chip">{{ i.img }} {{ i.name }} ×{{ i.qty }}</span>
           {% endfor %}
-          {% if r.items|length > 3 %}
-          <span class="chip">+{{ r.items|length - 3 }} más</span>
+          {% if r.productos|length > 3 %}
+          <span class="chip">+{{ r.productos|length - 3 }} más</span>
           {% endif %}
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -129,7 +129,7 @@
           <table>
             <thead><tr><th>Producto</th><th>Categoría</th><th>Precio unit.</th><th>Cant.</th><th style="text-align:right">Subtotal</th></tr></thead>
             <tbody>
-              {% for i in r.items|list %}
+              {% for i in r.productos|list %}
               <tr>
                 <td>{{ i.img }} {{ i.name }}</td>
                 <td>{{ i.category }}</td>

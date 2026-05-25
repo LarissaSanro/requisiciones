@@ -415,7 +415,7 @@ def enviar():
         "area":       area["name"],
         "area_id":    area["id"],
         "cc":         area["cc"],
-        "items":      items,
+        "productos":   items,
         "notes":      notes,
         "total":      total,
         "authorized": authorized,
