@@ -103,7 +103,7 @@
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
           {% for i in r.items|list %}
-          
+
           <span class="chip">{{ i.img }} {{ i.name }} ×{{ i.qty }}</span>
           {% endfor %}
           {% if r.items|length > 3 %}
@@ -129,7 +129,7 @@
           <table>
             <thead><tr><th>Producto</th><th>Categoría</th><th>Precio unit.</th><th>Cant.</th><th style="text-align:right">Subtotal</th></tr></thead>
             <tbody>
-              {% for i in r.items %}
+              {% for i in r.items|list %}
               <tr>
                 <td>{{ i.img }} {{ i.name }}</td>
                 <td>{{ i.category }}</td>
