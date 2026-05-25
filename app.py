@@ -296,6 +296,7 @@ def get_default_catalog():
         {"id":"264","name":"TINTA PARA SELLO","category":"PAPELERÍA","unit":"PIEZA","img":"🖨️","price":0},
         {"id":"265","name":"TINTA PROTECTORA","category":"PAPELERÍA","unit":"PIEZA","img":"https://i.ibb.co/5X7nCN7H/TINTA-PROTECTORA.jpg","price":0},
         {"id":"266","name":"VALE DE HOJAS","category":"PAPELERÍA","unit":"PIEZA","img":"https://i.ibb.co/j90YnR4N/VALE-DE-HOJAS.jpg","price":0},
+        ]
 
 
 def load_data():
