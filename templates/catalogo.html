@@ -8,14 +8,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
     header { background: #1e293b; color: #fff; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-    .h-left { display: flex; align-items: center; gap: 8px; }
     .h-chip { background: #334155; padding: 2px 10px; border-radius: 20px; font-size: 11px; color: #94a3b8; }
-    .h-btn { padding: 5px 12px; border: 1.5px solid #334155; border-radius: 6px; background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: none; }
+    .h-btn { padding: 5px 12px; border: 1.5px solid #334155; border-radius: 6px; background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: none; position: relative; }
     .h-btn.active { background: #334155; color: #fff; }
     .budget-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 24px; }
     .budget-info { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-bottom: 5px; }
-    .track { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
-    .fill { height: 100%; border-radius: 4px; transition: width .4s; }
+    .track { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; position: relative; }
+    .fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; transition: width .4s; }
     .content { padding: 20px 24px; max-width: 1100px; margin: 0 auto; }
     .filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
     input[type=search] { padding: 9px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; width: 100%; outline: none; }
@@ -24,7 +23,8 @@
     .cat-btn.active { background: #1e293b; color: #fff; border-color: #1e293b; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
     .card { background: #fff; border-radius: 12px; padding: 14px 10px; box-shadow: 0 1px 4px rgba(0,0,0,.06); display: flex; flex-direction: column; align-items: center; gap: 5px; border: 1.5px solid #f1f5f9; }
-    .card-emoji { font-size: 28px; }
+    .card-emoji { font-size: 28px; display: flex; align-items: center; justify-content: center; height: 50px; }
+    .card-img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
     .card-name { font-size: 12px; font-weight: 600; color: #1e293b; text-align: center; line-height: 1.3; }
     .card-unit { font-size: 10px; color: #94a3b8; }
     .card-cat { font-size: 10px; background: #f1f5f9; color: #64748b; padding: 2px 7px; border-radius: 10px; }
@@ -33,21 +33,24 @@
     .qty-btn { width: 24px; height: 24px; border: 1.5px solid #e2e8f0; border-radius: 5px; background: #f8fafc; cursor: pointer; font-size: 14px; font-weight: 700; }
     .qty-input { width: 34px; height: 24px; text-align: center; border: 1.5px solid #e2e8f0; border-radius: 5px; font-size: 12px; font-weight: 600; }
     .in-cart { font-size: 10px; color: #10b981; font-weight: 600; }
-    .float-bar { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; color: #fff; padding: 10px 22px; border-radius: 40px; display: flex; align-items: center; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.3); font-size: 13px; display: none; }
+    .float-bar { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; color: #fff; padding: 10px 22px; border-radius: 40px; display: none; align-items: center; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.3); font-size: 13px; }
     .float-btn { padding: 7px 16px; background: #f59e0b; color: #1e293b; border: none; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
-    .empty { text-align: center; padding: 60px 0; color: #94a3b8; }
+    .badge { position: absolute; top: -6px; right: -6px; background: #f59e0b; color: #fff; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
   </style>
 </head>
 <body>
 <header>
-  <div class="h-left">
+  <div style="display:flex;align-items:center;gap:8px">
     <span style="font-size:18px">📋</span>
     <span style="font-weight:700;font-size:15px">Requisiciones</span>
     <span class="h-chip">{{ area.name }}</span>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <a href="/catalogo" class="h-btn active">Catálogo</a>
-    <a href="/carrito" class="h-btn" id="cart-nav">Carrito <span id="cart-count-badge"></span></a>
+    <a href="/carrito" class="h-btn" id="cart-nav">
+      Carrito
+      <span class="badge" id="cart-badge" style="display:{{ 'flex' if cart else 'none' }}">{{ cart.values()|sum if cart else 0 }}</span>
+    </a>
     <a href="/logout" class="h-btn">Salir</a>
   </div>
 </header>
@@ -55,27 +58,19 @@
 <div class="budget-bar">
   <div class="budget-info">
     <span>Presupuesto mensual: <b style="color:#1e293b">${{ "%.2f"|format(area.budget) }}</b></span>
-    <span id="remaining-label" style="color:#10b981">Disponible: <b>${{ "%.2f"|format(area.budget - spent) }}</b></span>
+    <span style="color:#10b981">Disponible: <b>${{ "%.2f"|format([area.budget - spent, 0]|max) }}</b></span>
   </div>
   <div class="track">
-    <div class="fill" id="budget-fill" style="width:{{ [((spent/area.budget)*100) if area.budget > 0 else 0, 100]|min }}%;background:{% if spent/area.budget >= 1 %}#ef4444{% elif spent/area.budget >= 0.8 %}#f59e0b{% else %}#10b981{% endif %}"></div>
+    <div class="fill" style="width:{{ [((spent/area.budget)*100) if area.budget > 0 else 0, 100]|min }}%;background:{% if area.budget > 0 and spent/area.budget >= 1 %}#ef4444{% elif area.budget > 0 and spent/area.budget >= 0.8 %}#f59e0b{% else %}#10b981{% endif %}"></div>
   </div>
-  <div id="cart-total-label" style="font-size:11px;color:#64748b;margin-top:3px;display:none"></div>
 </div>
 
 <div class="content">
   <div class="filters">
-    <input type="search" id="search" placeholder="🔍  Buscar insumo..." oninput="filterProducts()">
+    <input type="search" id="search" placeholder="🔍  Buscar insumo..." oninput="renderGrid()">
     <div class="cats" id="cats"></div>
   </div>
-  {% if catalog %}
   <div class="grid" id="grid"></div>
-  {% else %}
-  <div class="empty">
-    <div style="font-size:44px">📭</div>
-    <p style="margin-top:10px">El catálogo aún no tiene productos.<br>El área de Compras los agregará pronto.</p>
-  </div>
-  {% endif %}
 </div>
 
 <div class="float-bar" id="float-bar">
@@ -87,46 +82,52 @@
 const CATALOG = {{ catalog|tojson }};
 const BUDGET  = {{ area.budget }};
 const SPENT   = {{ spent }};
-let cart = JSON.parse(localStorage.getItem('cart') || '{}');
+let cart = {{ cart|tojson }};
+// convert keys and values
+Object.keys(cart).forEach(k => { cart[k] = parseInt(cart[k]); });
 
 const cats = ['Todos', ...new Set(CATALOG.map(p => p.category))];
-const catsEl = document.getElementById('cats');
 let activeCat = 'Todos';
 
+// Build category buttons
+const catsEl = document.getElementById('cats');
 cats.forEach(c => {
   const b = document.createElement('button');
   b.className = 'cat-btn' + (c === 'Todos' ? ' active' : '');
   b.textContent = c;
-  b.onclick = () => { activeCat = c; document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); renderGrid(); };
+  b.onclick = () => {
+    activeCat = c;
+    document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    renderGrid();
+  };
   catsEl.appendChild(b);
 });
 
-function getCartTotal() {
-  return Object.entries(cart).reduce((s, [id, qty]) => { const p = CATALOG.find(x => x.id === id); return s + (p ? p.price * qty : 0); }, 0);
-}
-function getCartCount() {
-  return Object.values(cart).reduce((s, q) => s + q, 0);
-}
 function fmt(n) { return '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2}); }
 
-function updateUI() {
-  const total = getCartTotal();
-  const count = getCartCount();
-  const remaining = BUDGET - SPENT - total;
-  const badge = document.getElementById('cart-count-badge');
-  badge.textContent = count > 0 ? `(${count})` : '';
+function getCount() { return Object.values(cart).reduce((s,q) => s+q, 0); }
+
+function updateFloatBar() {
+  const count = getCount();
   const fl = document.getElementById('float-bar');
   fl.style.display = count > 0 ? 'flex' : 'none';
-  document.getElementById('float-label').textContent = `${count} producto${count!==1?'s':''} · ${fmt(total)}`;
-  const tl = document.getElementById('cart-total-label');
-  if (total > 0) { tl.style.display = 'block'; tl.textContent = `Carrito: ${fmt(total)}`; } else { tl.style.display = 'none'; }
-  localStorage.setItem('cart', JSON.stringify(cart));
+  document.getElementById('float-label').textContent = count + ' producto' + (count!==1?'s':'');
+  const badge = document.getElementById('cart-badge');
+  if (count > 0) { badge.style.display = 'flex'; badge.textContent = count; }
+  else badge.style.display = 'none';
 }
 
 function setQty(id, val) {
   const q = Math.max(0, parseInt(val) || 0);
   if (q === 0) delete cart[id]; else cart[id] = q;
-  updateUI();
+  // sync with server
+  fetch('/actualizar_carrito', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({id, qty: q})
+  });
+  updateFloatBar();
   const inp = document.getElementById('qty-' + id);
   const badge = document.getElementById('badge-' + id);
   if (inp) inp.value = q;
@@ -135,30 +136,34 @@ function setQty(id, val) {
 
 function renderGrid() {
   const q = document.getElementById('search').value.toLowerCase();
-  const filtered = CATALOG.filter(p => (activeCat === 'Todos' || p.category === activeCat) && p.name.toLowerCase().includes(q));
+  const filtered = CATALOG.filter(p =>
+    (activeCat === 'Todos' || p.category === activeCat) &&
+    p.name.toLowerCase().includes(q)
+  );
   const grid = document.getElementById('grid');
-  if (!grid) return;
-  grid.innerHTML = filtered.map(p => `
-    <div class="card">
-      <div class="card-emoji">${(p.img.startsWith('http') || p.img.startsWith('/static')) ? '<img src="' + p.img + '" style="width:50px;height:50px;object-fit:cover;border-radius:8px">' : p.img}</div>
-      <div class="card-name">${p.name}</div>
-      <div class="card-unit">${p.unit}</div>
-      <div class="card-cat">${p.category}</div>
-      <div class="card-price">${fmt(p.price)}</div>
-      <div class="qty-row">
-        <button class="qty-btn" onclick="setQty('${p.id}', (cart['${p.id}']||0)-1)">−</button>
-        <input class="qty-input" type="number" id="qty-${p.id}" min="0" value="${cart[p.id]||0}" onchange="setQty('${p.id}', this.value)">
-        <button class="qty-btn" onclick="setQty('${p.id}', (cart['${p.id}']||0)+1)">+</button>
-      </div>
-      <div class="in-cart" id="badge-${p.id}" style="display:${cart[p.id]>0?'block':'none'}">✓ En carrito</div>
-    </div>
-  `).join('');
+  grid.innerHTML = filtered.map(p => {
+    const isImg = p.img.startsWith('http') || p.img.startsWith('/static');
+    const imgHtml = isImg
+      ? '<img src="' + p.img + '" class="card-img">'
+      : '<div class="card-emoji">' + p.img + '</div>';
+    return '<div class="card">' +
+      imgHtml +
+      '<div class="card-name">' + p.name + '</div>' +
+      '<div class="card-unit">' + p.unit + '</div>' +
+      '<div class="card-cat">' + p.category + '</div>' +
+      '<div class="card-price">' + fmt(p.price) + '</div>' +
+      '<div class="qty-row">' +
+        '<button class="qty-btn" onclick="setQty(\'' + p.id + '\',' + ((cart[p.id]||0)-1) + ')">−</button>' +
+        '<input class="qty-input" type="number" id="qty-' + p.id + '" min="0" value="' + (cart[p.id]||0) + '" onchange="setQty(\'' + p.id + '\',this.value)">' +
+        '<button class="qty-btn" onclick="setQty(\'' + p.id + '\',' + ((cart[p.id]||0)+1) + ')">+</button>' +
+      '</div>' +
+      '<div class="in-cart" id="badge-' + p.id + '" style="display:' + (cart[p.id]>0?'block':'none') + '">✓ En carrito</div>' +
+    '</div>';
+  }).join('');
 }
 
-function filterProducts() { renderGrid(); }
-
 renderGrid();
-updateUI();
+updateFloatBar();
 </script>
 </body>
 </html>

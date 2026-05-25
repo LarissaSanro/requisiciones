@@ -8,14 +8,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; }
     header { background: #1e293b; color: #fff; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-    .h-left { display: flex; align-items: center; gap: 8px; }
     .h-chip { background: #334155; padding: 2px 10px; border-radius: 20px; font-size: 11px; color: #94a3b8; }
     .h-btn { padding: 5px 12px; border: 1.5px solid #334155; border-radius: 6px; background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: none; }
     .h-btn.active { background: #334155; color: #fff; }
     .budget-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 24px; }
     .budget-info { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-bottom: 5px; }
     .track { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; position: relative; }
-    .fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; transition: width .4s; }
+    .fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; }
     .content { padding: 20px 24px; max-width: 700px; margin: 0 auto; }
     h2 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 14px; }
     .cart-item { background: #fff; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1.5px solid #f1f5f9; margin-bottom: 8px; }
@@ -32,19 +31,20 @@
     .btn-primary { padding: 12px; background: #1e293b; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 8px; }
     .btn-secondary { padding: 11px; background: transparent; color: #64748b; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; cursor: pointer; width: 100%; text-align: center; display: block; text-decoration: none; }
     .empty { text-align: center; padding: 60px 0; color: #94a3b8; }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal-card { background: #fff; border-radius: 16px; padding: 30px 26px; width: 310px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
     .modal-card h3 { font-size: 16px; font-weight: 700; text-align: center; }
     .modal-card p { font-size: 13px; color: #64748b; text-align: center; }
     input[type=password] { padding: 9px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; width: 100%; outline: none; }
     .error-msg { font-size: 12px; color: #ef4444; text-align: center; }
-    .sent-wrap { position: fixed; inset: 0; background: #f8fafc; display: flex; align-items: center; justify-content: center; display: none; }
+    .sent-wrap { position: fixed; inset: 0; background: #f8fafc; display: none; align-items: center; justify-content: center; }
     .sent-card { background: #fff; border-radius: 16px; padding: 40px 30px; width: 320px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,.1); display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    .prod-img { width: 36px; height: 36px; object-fit: cover; border-radius: 6px; }
   </style>
 </head>
 <body>
 <header>
-  <div class="h-left">
+  <div style="display:flex;align-items:center;gap:8px">
     <span style="font-size:18px">📋</span>
     <span style="font-weight:700;font-size:15px">Requisiciones</span>
     <span class="h-chip">{{ area.name }}</span>
@@ -73,7 +73,6 @@
   <div id="cart-content"></div>
 </div>
 
-<!-- Modal Dirección -->
 <div class="modal-overlay" id="modal">
   <div class="modal-card">
     <div style="font-size:36px;text-align:center">🔐</div>
@@ -82,18 +81,17 @@
     <input type="password" id="dir-pass" placeholder="Contraseña de Dirección">
     <p class="error-msg" id="dir-error" style="display:none"></p>
     <button class="btn-primary" onclick="handleAuth()">Autorizar y enviar</button>
-    <button class="btn-secondary" style="display:block" onclick="closeModal()">Cancelar</button>
+    <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
   </div>
 </div>
 
-<!-- Pantalla enviado -->
 <div class="sent-wrap" id="sent-wrap">
   <div class="sent-card">
     <div style="font-size:52px">✅</div>
     <h2 style="font-size:19px;color:#1e293b">¡Requisición enviada!</h2>
     <p style="font-size:13px;color:#64748b">Compras recibirá tu solicitud pronto.</p>
     <p id="auth-note" style="font-size:12px;color:#f59e0b;display:none">⚠️ Enviada con autorización de Dirección</p>
-    <button class="btn-primary" onclick="nuevaReq()">Nueva requisición</button>
+    <button class="btn-primary" onclick="window.location.href='/catalogo'">Nueva requisición</button>
     <a href="/logout" class="btn-secondary">Cerrar sesión</a>
   </div>
 </div>
@@ -102,24 +100,33 @@
 const CATALOG  = {{ catalog|tojson }};
 const BUDGET   = {{ area.budget }};
 const SPENT    = {{ spent }};
-let cart       = JSON.parse(localStorage.getItem('cart') || '{}');
-let authorized = false;
+let cart       = {{ cart|tojson }};
+Object.keys(cart).forEach(k => { cart[k] = parseInt(cart[k]); });
+
+const catalogMap = {};
+CATALOG.forEach(p => catalogMap[p.id] = p);
 
 function fmt(n) { return '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2}); }
 
-function getCartTotal() {
-  return Object.entries(cart).reduce((s,[id,qty]) => { const p=CATALOG.find(x=>x.id===id); return s+(p?p.price*qty:0); },0);
+function getTotal() {
+  return Object.entries(cart).reduce((s,[id,qty]) => {
+    const p = catalogMap[id]; return s + (p ? p.price * qty : 0);
+  }, 0);
 }
 
 function setQty(id, val) {
   const q = Math.max(0, parseInt(val)||0);
-  if (q===0) delete cart[id]; else cart[id]=q;
-  localStorage.setItem('cart', JSON.stringify(cart));
+  if (q === 0) delete cart[id]; else cart[id] = q;
+  fetch('/actualizar_carrito', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({id, qty: q})
+  });
   render();
 }
 
 function render() {
-  const total    = getCartTotal();
+  const total    = getTotal();
   const remaining = BUDGET - SPENT - total;
   const over     = remaining < 0;
   const pctSpent = BUDGET > 0 ? Math.min(100,(SPENT/BUDGET)*100) : 0;
@@ -130,5 +137,80 @@ function render() {
   document.getElementById('cart-fill').style.left  = pctSpent+'%';
   document.getElementById('cart-fill').style.width = pctCart+'%';
   document.getElementById('cart-fill').style.background = over?'#ef444488':'#3b82f688';
-  document.getElementById('remaining-label').innerHTML = `<span style="color:${over?'#ef4444':'#10b981'}">Disponible: <b>${fmt(Math.max(0,remaining))}</b></span>`;
-  document.getElementById('cart-total-label').textContent = total > 0 ? `Carrito: ${fmt(total)}
+  document.getElementById('remaining-label').innerHTML = '<span style="color:'+(over?'#ef4444':'#10b981')+'">Disponible: <b>'+fmt(Math.max(0,remaining))+'</b></span>';
+  document.getElementById('cart-total-label').textContent = total > 0 ? 'Carrito: '+fmt(total)+(over?' · Excede presupuesto en '+fmt(Math.abs(remaining)):'') : '';
+
+  const items = Object.entries(cart).map(([id,qty]) => {
+    const p = catalogMap[id]; return p ? {...p, qty} : null;
+  }).filter(Boolean);
+
+  const el = document.getElementById('cart-content');
+
+  if (items.length === 0) {
+    el.innerHTML = '<div class="empty"><div style="font-size:44px">🛒</div><p style="margin:10px 0 16px">Tu carrito está vacío.</p><a href="/catalogo" class="btn-secondary">Ir al catálogo</a></div>';
+    return;
+  }
+
+  const isImg = src => src.startsWith('http') || src.startsWith('/static');
+
+  el.innerHTML =
+    items.map(p => '<div class="cart-item">' +
+      (isImg(p.img) ? '<img src="'+p.img+'" class="prod-img">' : '<span style="font-size:20px">'+p.img+'</span>') +
+      '<div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-sub">'+p.unit+' · '+fmt(p.price)+' c/u</div></div>' +
+      '<div class="qty-row"><button class="qty-btn" onclick="setQty(\''+p.id+'\','+(p.qty-1)+')">−</button><span style="font-size:13px;font-weight:700;min-width:20px;text-align:center">'+p.qty+'</span><button class="qty-btn" onclick="setQty(\''+p.id+'\','+(p.qty+1)+')">+</button></div>' +
+      '<div class="item-total">'+fmt(p.price*p.qty)+'</div>' +
+      '<button class="remove-btn" onclick="setQty(\''+p.id+'\',0)">✕</button>' +
+    '</div>').join('') +
+    '<div class="summary"><span style="font-size:14px;color:#64748b">Total del carrito</span><span style="font-size:16px;font-weight:800;color:#1e293b">'+fmt(total)+'</span></div>' +
+    (over ? '<div class="alert-box">⚠️ Excede el presupuesto disponible ('+fmt(BUDGET-SPENT)+') en <b>'+fmt(Math.abs(remaining))+'</b>. Requiere autorización de Dirección.</div>' : '') +
+    '<label style="font-size:13px;color:#64748b;display:block;margin-bottom:6px">Notas / justificación (opcional)</label>' +
+    '<textarea id="notes" rows="3" placeholder="Ej: Reposición mensual, evento especial..."></textarea>' +
+    '<button class="btn-primary" style="background:'+(over?'#f59e0b':'#1e293b')+'" onclick="trySubmit()">' +
+      (over ? 'Solicitar autorización de Dirección ⚠️' : 'Enviar requisición a Compras ✓') +
+    '</button>' +
+    '<a href="/catalogo" class="btn-secondary">← Seguir agregando</a>';
+}
+
+function trySubmit() {
+  const total = getTotal();
+  const over  = (BUDGET - SPENT - total) < 0;
+  if (over) { openModal(BUDGET - SPENT - total); return; }
+  doSubmit(false, '');
+}
+
+function openModal(diff) {
+  document.getElementById('modal-msg').innerHTML = 'Excede presupuesto en <b style="color:#ef4444">'+fmt(Math.abs(diff))+'</b>.<br>Ingresa la contraseña de Dirección para continuar.';
+  document.getElementById('modal').style.display = 'flex';
+  document.getElementById('dir-error').style.display = 'none';
+  document.getElementById('dir-pass').value = '';
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+function handleAuth() {
+  const pass = document.getElementById('dir-pass').value;
+  doSubmit(true, pass);
+}
+
+function doSubmit(authorized, dirPass) {
+  const notes = document.getElementById('notes') ? document.getElementById('notes').value : '';
+  fetch('/enviar', {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({ notes, authorized: authorized.toString(), dir_password: dirPass })
+  }).then(r=>r.json()).then(data => {
+    if (data.ok) {
+      cart = {};
+      if (authorized) document.getElementById('auth-note').style.display = 'block';
+      document.getElementById('sent-wrap').style.display = 'flex';
+      closeModal();
+    } else {
+      document.getElementById('dir-error').textContent = data.error;
+      document.getElementById('dir-error').style.display = 'block';
+    }
+  });
+}
+
+render();
+</script>
+</body>
+</html>

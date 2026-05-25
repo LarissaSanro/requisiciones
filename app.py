@@ -25,7 +25,7 @@ AREAS = [
 
 COMPRAS_PASSWORD   = "compras2024"
 DIRECCION_PASSWORD = "direccion2024"
-IMGBB_API_KEY = "9d97d0d356aaf6b933b1a8ebab8ab14a"
+IMGBB_API_KEY      = "9d97d0d356aaf6b933b1a8ebab8ab14a"
 DATA_FILE = "data.json"
 
 def get_default_catalog():
@@ -327,6 +327,7 @@ def login():
         if mode == "compras":
             if password == COMPRAS_PASSWORD:
                 session["role"] = "compras"
+                session["cart"] = {}
                 return redirect(url_for("compras"))
             else:
                 error = "Contraseña incorrecta."
@@ -338,6 +339,7 @@ def login():
             elif password == area["password"]:
                 session["role"]    = "area"
                 session["area_id"] = area_id
+                session["cart"]    = {}
                 return redirect(url_for("catalogo"))
             else:
                 error = "Contraseña incorrecta."
@@ -356,7 +358,23 @@ def catalogo():
     area  = get_area(session["area_id"])
     mo    = current_month()
     spent = data["spent"].get(session["area_id"], {}).get(mo, 0)
-    return render_template("catalogo.html", area=area, catalog=data["catalog"], spent=spent)
+    cart  = session.get("cart", {})
+    return render_template("catalogo.html", area=area, catalog=data["catalog"], spent=spent, cart=cart)
+
+@app.route("/actualizar_carrito", methods=["POST"])
+def actualizar_carrito():
+    if session.get("role") != "area":
+        return jsonify({"ok": False})
+    prod_id = request.form.get("id")
+    qty     = int(request.form.get("qty", 0))
+    cart    = session.get("cart", {})
+    if qty <= 0:
+        cart.pop(prod_id, None)
+    else:
+        cart[prod_id] = qty
+    session["cart"] = cart
+    session.modified = True
+    return jsonify({"ok": True, "count": sum(cart.values())})
 
 @app.route("/carrito")
 def carrito():
@@ -366,7 +384,8 @@ def carrito():
     area  = get_area(session["area_id"])
     mo    = current_month()
     spent = data["spent"].get(session["area_id"], {}).get(mo, 0)
-    return render_template("carrito.html", area=area, catalog=data["catalog"], spent=spent)
+    cart  = session.get("cart", {})
+    return render_template("carrito.html", area=area, catalog=data["catalog"], spent=spent, cart=cart)
 
 @app.route("/enviar", methods=["POST"])
 def enviar():
@@ -374,7 +393,7 @@ def enviar():
         return redirect(url_for("login"))
     data       = load_data()
     area       = get_area(session["area_id"])
-    cart       = json.loads(request.form.get("cart", "{}"))
+    cart       = session.get("cart", {})
     notes      = request.form.get("notes", "")
     authorized = request.form.get("authorized", "false") == "true"
     dir_pass   = request.form.get("dir_password", "")
@@ -410,6 +429,8 @@ def enviar():
         data["spent"][area["id"]] = {}
     data["spent"][area["id"]][mo] = data["spent"][area["id"]].get(mo, 0) + total
     save_data(data)
+    session["cart"] = {}
+    session.modified = True
     return jsonify({"ok": True})
 
 @app.route("/compras")
