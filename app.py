@@ -506,6 +506,12 @@ def eliminar_producto():
     save_data(data)
     return jsonify({"ok": True})
 
+@app.route("/export_catalog")
+def export_catalog():
+    if session.get("role") != "compras":
+        return redirect(url_for("login"))
+    data = load_data()
+    return jsonify(data["catalog"])
 @app.route("/subir_imagen", methods=["POST"])
 def subir_imagen():
     if session.get("role") != "compras":
