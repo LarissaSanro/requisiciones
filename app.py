@@ -8,23 +8,26 @@ app = Flask(__name__)
 app.secret_key = "requisiciones2024"
 
 AREAS = [
-    {"id": "direccion",      "name": "Dirección",                          "password": "dir123",       "budget": 74.83,    "cc": 1},
-    {"id": "contabilidad",   "name": "Contabilidad y Administración",      "password": "conta123",     "budget": 2000.00,  "cc": 2},
-    {"id": "licitaciones",   "name": "Licitaciones",                       "password": "licit123",     "budget": 14412.10, "cc": 4},
-    {"id": "obras",          "name": "Obras",                              "password": "obras123",     "budget": 528.42,   "cc": 5},
-    {"id": "almacen",        "name": "Almacén",                            "password": "almacen123",   "budget": 4853.33,  "cc": 6},
-    {"id": "logistica",      "name": "Logística",                          "password": "logis123",     "budget": 0.00,     "cc": 7},
-    {"id": "produccion",     "name": "Producción",                         "password": "prod123",      "budget": 947.33,   "cc": 8},
-    {"id": "diseno",         "name": "Diseño",                             "password": "diseno123",    "budget": 1699.58,  "cc": 9},
-    {"id": "compras",        "name": "Compras",                            "password": "compras123",   "budget": 3488.33,  "cc": 10},
-    {"id": "proyectos",      "name": "Proyectos",                          "password": "proy123",      "budget": 380.00,   "cc": 11},
-    {"id": "capital_humano", "name": "Capital Humano",                     "password": "rrhh123",      "budget": 2945.83,  "cc": 12},
-    {"id": "seg_higiene",    "name": "Seguridad e Higiene y Mejora Cont.", "password": "seg123",       "budget": 140.00,   "cc": 13},
-    {"id": "ti",             "name": "TI",                                 "password": "ti123",        "budget": 19295.83, "cc": 14},
+    {"id": "direccion",      "name": "Dirección",                          "password": "NylexDir3456",   "budget": 74.83,    "cc": 1},
+    {"id": "contabilidad",   "name": "Contabilidad y Administración",      "password": "NylexCoad5678",  "budget": 2000.00,  "cc": 2},
+    {"id": "licitaciones",   "name": "Licitaciones",                       "password": "NylexLic7896",   "budget": 14412.10, "cc": 4},
+    {"id": "obras",          "name": "Obras",                              "password": "NylexOb6432",    "budget": 528.42,   "cc": 5},
+    {"id": "almacen",        "name": "Almacén",                            "password": "NylexAlm7653",   "budget": 4853.33,  "cc": 6},
+    {"id": "logistica",      "name": "Logística",                          "password": "NylexLog1245",   "budget": 0.00,     "cc": 7},
+    {"id": "produccion",     "name": "Producción",                         "password": "NylexProd6912",  "budget": 947.33,   "cc": 8},
+    {"id": "diseno",         "name": "Diseño",                             "password": "NylexDis6543",   "budget": 1699.58,  "cc": 9},
+    {"id": "compras",        "name": "Compras",                            "password": "NylexComp2918",  "budget": 3488.33,  "cc": 10},
+    {"id": "proyectos",      "name": "Proyectos",                          "password": "NylexProy7609",  "budget": 380.00,   "cc": 11},
+    {"id": "capital_humano", "name": "Capital Humano",                     "password": "NylexCaph4231",  "budget": 2945.83,  "cc": 12},
+    {"id": "seg_higiene",    "name": "Seguridad e Higiene y Mejora Cont.", "password": "NylexSeyh3907",  "budget": 140.00,   "cc": 13},
+    {"id": "ti",             "name": "TI",                                 "password": "NylexTI4392",    "budget": 19295.83, "cc": 14},
 ]
 
-COMPRAS_PASSWORD   = "compras2024"
-DIRECCION_PASSWORD = "direccion2024"
+COMPRAS_PASSWORD   = "Compras2024"
+DIRECCION_PASSWORD = "Direccion2025"
+
+COMPRAS_PASSWORD   = "Compras2024"
+DIRECCION_PASSWORD = "Direccion2025"
 IMGBB_API_KEY      = "9d97d0d356aaf6b933b1a8ebab8ab14a"
 DATA_FILE = "data.json"
 
