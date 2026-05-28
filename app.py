@@ -32,10 +32,10 @@ IMGBB_API_KEY      = "9d97d0d356aaf6b933b1a8ebab8ab14a"
 
 # ── BASE DE DATOS ─────────────────────────────────────────────────────────────
 def get_db():
-    db_url = os.environ.get("DATABASE_PUBLIC_URL") or os.environ.get("DATABASE_URL")
+    db_url = os.environ.get("DATABASE_URL")
     print(f"DB URL encontrada: {'Sí' if db_url else 'NO - Variable no existe'}", flush=True)
     if not db_url:
-        raise Exception("No se encontró DATABASE_PUBLIC_URL ni DATABASE_URL")
+        raise Exception("No se encontró DATABASE_URL")
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor)
