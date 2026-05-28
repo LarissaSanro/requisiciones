@@ -32,7 +32,7 @@ IMGBB_API_KEY      = "9d97d0d356aaf6b933b1a8ebab8ab14a"
 
 # ── BASE DE DATOS ─────────────────────────────────────────────────────────────
 def get_db():
-    db_url = os.environ.get("DATABASE_URL")
+    db_url = os.environ.get("DATABASE_PUBLIC_URL")
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor)
