@@ -66,6 +66,15 @@ def init_db():
             price FLOAT
         );
         CREATE TABLE IF NOT EXISTS spent (
+    area_id TEXT,
+    month TEXT,
+    amount FLOAT,
+    PRIMARY KEY (area_id, month)
+);
+CREATE TABLE IF NOT EXISTS budgets (
+    area_id TEXT PRIMARY KEY,
+    amount FLOAT
+);
             area_id TEXT,
             month TEXT,
             amount FLOAT,
@@ -182,6 +191,15 @@ try:
     if count == 0:
         save_catalog(get_default_catalog())
         print("Catálogo inicial cargado")
+    
+    # Cargar presupuestos guardados en BD
+    cur.execute("SELECT area_id, amount FROM budgets")
+    saved_budgets = cur.fetchall()
+    for row in saved_budgets:
+        for a in AREAS:
+            if a["id"] == row["area_id"]:
+                a["budget"] = row["amount"]
+                break
 except Exception as e:
     print(f"Error BD: {e}")
 
@@ -328,6 +346,15 @@ def guardar_presupuesto():
         return jsonify({"ok": False})
     area_id = request.form.get("area_id")
     budget  = float(request.form.get("budget", 0))
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO budgets (area_id, amount) VALUES (%s, %s)
+        ON CONFLICT (area_id) DO UPDATE SET amount = EXCLUDED.amount
+    """, (area_id, budget))
+    conn.commit()
+    cur.close()
+    conn.close()
     for a in AREAS:
         if a["id"] == area_id:
             a["budget"] = budget
