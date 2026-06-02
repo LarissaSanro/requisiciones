@@ -24,7 +24,7 @@ AREAS = [
     {"id": "capital_humano", "name": "Capital Humano",                     "password": "NylexCaph4231",  "budget": 2945.83,  "cc": 12},
     {"id": "seg_higiene",    "name": "Seguridad e Higiene y Mejora Cont.", "password": "NylexSeyh3907",  "budget": 140.00,   "cc": 13},
     {"id": "ti",             "name": "TI",                                 "password": "NylexTI4392",    "budget": 19295.83, "cc": 14},
-    {"id": "dir_general", "name": "Dirección General", "password": "NylexDirGen2025", "budget": 0.00, "cc": 15},
+    {"id": "dir_general", "name": "Dirección General", "password": "NylexDirGen2025", "budget": 999999.00, "cc": 15},
 ]
 
 COMPRAS_PASSWORD   = "Compras2024"
