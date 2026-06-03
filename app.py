@@ -67,19 +67,14 @@ def init_db():
             price FLOAT
         );
         CREATE TABLE IF NOT EXISTS spent (
-    area_id TEXT,
-    month TEXT,
-    amount FLOAT,
-    PRIMARY KEY (area_id, month)
-);
-CREATE TABLE IF NOT EXISTS budgets (
-    area_id TEXT PRIMARY KEY,
-    amount FLOAT
-);
             area_id TEXT,
             month TEXT,
             amount FLOAT,
             PRIMARY KEY (area_id, month)
+        );
+        CREATE TABLE IF NOT EXISTS budgets (
+            area_id TEXT PRIMARY KEY,
+            amount FLOAT
         );
     """)
     conn.commit()
