@@ -177,24 +177,25 @@ def get_default_catalog():
 # ── INICIALIZAR BD ─────────────────────────────────────────────────────────────
 try:
     init_db()
-    # Cargar catálogo inicial si está vacío
     conn = get_db()
     cur = conn.cursor()
+    
+    # Cargar catálogo inicial si está vacío
     cur.execute("SELECT COUNT(*) as c FROM catalog")
     count = cur.fetchone()["c"]
-    cur.close()
-    conn.close()
     if count == 0:
         save_catalog(get_default_catalog())
         print("Catálogo inicial cargado")
     
     # Cargar presupuestos guardados en BD
+    cur.execute("SELECT area_id, amount FROM budgets")
     saved_budgets = cur.fetchall()
     for row in saved_budgets:
         for a in AREAS:
             if a["id"] == row["area_id"]:
                 a["budget"] = row["amount"]
                 break
+    
     cur.close()
     conn.close()
 except Exception as e:
