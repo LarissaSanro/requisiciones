@@ -194,13 +194,14 @@ try:
         print("Catálogo inicial cargado")
     
     # Cargar presupuestos guardados en BD
-    cur.execute("SELECT area_id, amount FROM budgets")
     saved_budgets = cur.fetchall()
     for row in saved_budgets:
         for a in AREAS:
             if a["id"] == row["area_id"]:
                 a["budget"] = row["amount"]
                 break
+    cur.close()
+    conn.close()
 except Exception as e:
     print(f"Error BD: {e}")
 
