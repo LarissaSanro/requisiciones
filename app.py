@@ -430,7 +430,7 @@ def export_excel():
     import io
     try:
         import openpyxl
-        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     except:
         return "pip install openpyxl", 500
 
@@ -439,38 +439,74 @@ def export_excel():
     ws = wb.active
     ws.title = "Requisiciones"
 
-    # Encabezados
-    headers = ["ID", "Área", "CC", "Fecha", "Estado", "Total", "Autorizado", "Notas", "Productos"]
+    thin = Side(style="thin", color="BFBFBF")
+    borde = Border(left=thin, right=thin, top=thin, bottom=thin)
+    center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    right = Alignment(horizontal="right", vertical="center")
+
+    headers = ["ID Requisición", "Área", "CC", "Fecha", "Estado", "Autorizado",
+               "Producto", "Cantidad", "Precio unitario", "Subtotal", "Notas"]
     for col, h in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col, value=h)
-        cell.font = Font(bold=True, color="FFFFFF")
-        cell.fill = PatternFill("solid", fgColor="1e293b")
-        cell.alignment = Alignment(horizontal="center")
+        cell.font = Font(name="Arial", bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor="1F3864")
+        cell.alignment = center
+        cell.border = borde
 
-    for row, r in enumerate(requisitions, 2):
-        prods = ", ".join([f"{p['name']} x{p['qty']}" for p in r["productos"]])
-        ws.cell(row=row, column=1, value=r["id"])
-        ws.cell(row=row, column=2, value=r["area"])
-        ws.cell(row=row, column=3, value=r["cc"])
-        ws.cell(row=row, column=4, value=r["created_at"])
-        ws.cell(row=row, column=5, value=r["status"])
-        ws.cell(row=row, column=6, value=r["total"])
-        ws.cell(row=row, column=7, value="Sí" if r["authorized"] else "No")
-        ws.cell(row=row, column=8, value=r["notes"])
-        ws.cell(row=row, column=9, value=prods)
+    row = 2
+    for r in requisitions:
+        productos = r["productos"] if r["productos"] else []
+        if not productos:
+            # Requisición sin productos: igual deja una fila
+            productos = [{"name": "—", "qty": 0, "price": 0, "subtotal": 0}]
+        for p in productos:
+            precio = p.get("price", 0)
+            qty = p.get("qty", 0)
+            subtotal = p.get("subtotal", precio * qty)
+            ws.cell(row=row, column=1, value=r["id"])
+            ws.cell(row=row, column=2, value=r["area"])
+            ws.cell(row=row, column=3, value=r["cc"])
+            ws.cell(row=row, column=4, value=r["created_at"])
+            ws.cell(row=row, column=5, value=str(r["status"]).capitalize())
+            ws.cell(row=row, column=6, value="Sí" if r["authorized"] else "No")
+            ws.cell(row=row, column=7, value=p.get("name", ""))
+            ws.cell(row=row, column=8, value=qty)
+            c9 = ws.cell(row=row, column=9, value=precio)
+            c9.number_format = '#,##0.00'
+            c9.alignment = right
+            c10 = ws.cell(row=row, column=10, value=subtotal)
+            c10.number_format = '#,##0.00'
+            c10.alignment = right
+            ws.cell(row=row, column=11, value=r.get("notes", "") or "")
+            for col in range(1, 12):
+                ws.cell(row=row, column=col).border = borde
+                ws.cell(row=row, column=col).font = Font(name="Arial", size=10)
+            row += 1
 
-    # Ajustar columnas
-    for col in ws.columns:
-        max_len = max(len(str(cell.value or "")) for cell in col)
-        ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 50)
+    # Fila de total general
+    ws.cell(row=row, column=6, value="TOTAL GENERAL")
+    tc = ws.cell(row=row, column=6)
+    tc.font = Font(name="Arial", bold=True, color="FFFFFF")
+    tc.fill = PatternFill("solid", fgColor="1F3864")
+    tc.alignment = right
+    total_cell = ws.cell(row=row, column=10, value=f"=SUM(J2:J{row-1})")
+    total_cell.number_format = '#,##0.00'
+    total_cell.font = Font(name="Arial", bold=True, color="FFFFFF")
+    total_cell.fill = PatternFill("solid", fgColor="1F3864")
+    total_cell.alignment = right
+
+    anchos = [20, 28, 6, 16, 14, 12, 34, 10, 14, 14, 40]
+    for i, w in enumerate(anchos, 1):
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+    ws.freeze_panes = "A2"
 
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
-
     from flask import send_file
     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                      as_attachment=True, download_name=f"requisiciones_{datetime.now().strftime('%Y%m%d')}.xlsx")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
